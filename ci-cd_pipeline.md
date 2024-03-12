@@ -163,6 +163,9 @@ deploy:
     needs: build
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
     - name: Download web-app content
       uses: actions/download-artifact@v4
       with:
@@ -170,7 +173,7 @@ deploy:
         path: target/
 
     - name: Build Docker image
-      run: docker build -t todoapi .
+      run: docker build -t my-user/todoapp .
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -187,10 +190,16 @@ deploy:
     needs: build
   ```
 
+* This step checks out the source code of the repository into the runner environment.
+
+  ```yaml
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+ 
 * This step downloads the artifact named my-artifact from the GitHub Actions workspace. The artifact is typically a file or directory generated during a previous step of the workflow. In this case, it seems to be the output of a build process, possibly containing the built web application files.
 
   ```yaml
-    steps:
       - name: Download web-app content
         uses: actions/download-artifact@v4
         with:
@@ -202,7 +211,7 @@ deploy:
 
   ```yaml
       - name: Build Docker image
-        run: docker build -t todoapi .
+        run: docker build -t my-user/todoapp .
   ```
 
 * This step logs in to Docker Hub using Docker Hub credentials provided as secrets. 
