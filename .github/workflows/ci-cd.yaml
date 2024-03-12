@@ -33,7 +33,7 @@ jobs:
         path: target/
         
   deploy:
-    runs-on: self-hosted
+    runs-on: subuntu-latest
     needs: build
 
     steps:
