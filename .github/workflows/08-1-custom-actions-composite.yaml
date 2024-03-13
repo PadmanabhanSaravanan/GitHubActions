@@ -1,0 +1,22 @@
+name: 08 - Custom Actions - Composite
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java & Maven dependencies
+        uses: ./.github/actions/composite-cache-deps
+        with:
+          java-version: 11
+
+      - name: Run tests
+        run: mvn test
+        
+      - name: Build with Maven
+        run: mvn clean install
