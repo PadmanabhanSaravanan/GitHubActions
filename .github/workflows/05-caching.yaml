@@ -33,8 +33,7 @@ jobs:
           
       - name: Calculate cache key
         id: cache-key
-        run: |
-          echo "CACHE_KEY=deps-maven-repo-${{ hashFiles('pom.xml') }}" >> "$GITHUB_ENV"
+        run: echo "CACHE_KEY=deps-maven-repo-${{ hashFiles('pom.xml') }}" >> $GITHUB_ENV
 
       - name: Download cached dependencies
         uses: actions/cache@v3
