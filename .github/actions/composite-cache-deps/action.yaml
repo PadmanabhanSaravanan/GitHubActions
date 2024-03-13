@@ -6,6 +6,10 @@ inputs:
     description: 'Java version to use'
     default: '11'
     required: true
+  working-dir:
+    description: The working directory of the application
+    default: .
+    required: false
 
 runs:
   using: 'composite'
@@ -19,3 +23,5 @@ runs:
 
     - name: Install Dependencies
       run: mvn dependency:go-offline
+      shell: bash
+      working-directory: ${{ inputs.working-dir }}
