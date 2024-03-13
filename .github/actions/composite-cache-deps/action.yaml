@@ -29,7 +29,6 @@ runs:
         distribution: 'adopt'
         java-version: ${{ inputs.java-version }}
         cache: 'maven'
-        target-env: ${{ inputs.target-env }}
 
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
