@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java & Maven dependencies
-        uses: ./.github/actions/composite-cache-deps
+        uses: padmanabhansaravanan/cache-deps@v1
         with:
           java-version: 11
           working-dir: ${{ env.working-directory }}
