@@ -63,3 +63,90 @@ You can build three types of actions in GitHub Actions:
 - Useful when users want to ensure stability.
 
 It is recommended to create a README file for your action which includes a description, input/output arguments, secrets, environment variables, and workflow examples. This makes it easier for other users to understand what the action does and how to customize it.
+
+## Publish Custom Action to Marketplace
+
+* Create a new public repository on GitHub.com. You can choose any repository name, or use the following `cache-deps` example.
+* Clone your repository to your computer. 
+* In the `cache-deps` repository, create a new file called `action.yml` and add the following example code. 
+
+  ```yaml
+  name: Cache Java and Maven Dependencies
+  description: This action allows caching both Java and Maven Dependencies based on the pom.xml file
+  
+  inputs: 
+    java-version:
+      description: 'Java version to use'
+      default: '11'
+      required: true
+    working-dir:
+      description: The working directory of the application
+      default: .
+      required: false
+  
+  runs:
+    using: 'composite'
+    steps: 
+      - name: Setup Java version ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: ${{ inputs.java-version }}
+          cache: 'maven'
+  
+      - name: Install Dependencies
+        run: mvn dependency:go-offline
+        shell: bash
+        working-directory: ${{ inputs.working-dir }}
+  ```
+
+* From your terminal, check in your action.yml file.
+
+  ```git
+  git add action.yml
+  git commit -m "Add action"
+  git push
+  ```
+
+* From your terminal, add a tag. This example uses a tag called v1.
+
+  ```git
+  git tag -a -m "Description of this release" v1
+  git push --follow-tags
+  ```
+
+## Testing out your action in a workflow
+
+* Copy the workflow code into a `.github/workflows/custom-composite-actions.yml` file in another repository, but replace `repository-name/cache-deps@v1` with the repository and tag you created. 
+
+  ```yaml
+  name: 08 - Custom Actions - Composite
+  run-name: 08 - Custom Actions - Composite
+  
+  on:
+    workflow_dispatch:
+  
+  env:
+    working-directory: ./
+  
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: checkout repository
+          uses: actions/checkout@v4
+  
+        - name: Setup Java & Maven dependencies
+          uses: your-repository-name/cache-deps@v1
+          with:
+            java-version: 11
+            working-dir: ${{ env.working-directory }}
+  
+        - name: Run tests
+          run: mvn test
+  
+        - name: Build with Maven
+          run: mvn clean install
+  ```
+
+* Run the workflow
