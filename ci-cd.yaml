@@ -1,7 +1,7 @@
 name: CI CD Pipeline for TodoApp
 
 on:
-  pull-request:
+  push:
     branches:
       - master
       
