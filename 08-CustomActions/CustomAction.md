@@ -115,6 +115,39 @@ It is recommended to create a README file for your action which includes a descr
   git push --follow-tags
   ```
 
+* Create a new release:
+
+  * Go to your repository on GitHub.
+  * Click on the "Releases" tab.
+  * Click on "Draft a new release".
+
+![image publish](../images/publish.png)
+
+* Mark as publish this action to the GitHub Marketplace:
+
+  * you'll see an option to "Publish this action to the GitHub Marketplace". Check this option.
+
+* Enable Two-Factor Authentication (2FA):
+
+  * If you haven't already enabled Two-Factor Authentication for your GitHub account, you'll need to do so. Follow the instructions provided by GitHub to set it up.
+
+* Select the tag and then release:
+
+  * When creating a new release, ensure you select the appropriate tag/version that corresponds to your action's release.
+
+![iamge publish](../images/publish2.png)
+
+* Review and confirm:
+
+  * Review all the details of your release, ensuring everything is accurate.
+  * Once satisfied, click on "Publish release".
+
+* Verify the action on GitHub Marketplace:
+
+  * After publishing the release, navigate to the "Marketplace" tab of your GitHub repository.
+  * You should see your action listed there.
+  * Users can now discover and install your action from the GitHub Marketplace.
+
 ## Testing out your action in a workflow
 
 * Copy the workflow code into a `.github/workflows/custom-composite-actions.yml` file in another repository, but replace `repository-name/cache-deps@v1` with the repository and tag you created. 
