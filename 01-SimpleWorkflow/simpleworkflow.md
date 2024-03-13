@@ -27,3 +27,20 @@ A step is an individual task within a job. Steps are the smallest building block
 - **Run Commands**: Steps execute commands or scripts. These can include shell commands, script files, or even invoking actions from external sources (GitHub Marketplace, your own custom actions, etc.).
 
 - **Inputs and Outputs**: Steps can have inputs and produce outputs, allowing them to communicate and share data with other steps.
+
+## SimpleWorkflow
+
+```yaml
+name: Simple Workflow
+on: push
+
+  jobs: 
+    my-first-job:
+      runs-on: ubuntu-latest
+      steps:
+        - run: echo "Hello World"
+    my-second-job:
+      runs-on: ubuntu-latest
+      steps:
+        - run: echo "Bye World"
+```
