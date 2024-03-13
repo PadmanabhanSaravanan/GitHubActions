@@ -1,20 +1,21 @@
 name: Cache Java and Maven Dependencies
-description: This action allows to cache both Java and Maven Dependencies on the pom.xml file
+description: This action allows caching both Java and Maven Dependencies based on the pom.xml file
 
 inputs: 
   java-version:
-    description: Java version to use
-    default: 11
+    description: 'Java version to use'
+    default: '11'
     required: true
 
 runs:
-  using: composite
+  using: 'composite'
   steps: 
     - name: Setup Java version ${{ inputs.java-version }}
       uses: actions/setup-java@v4
-            with:
-              distribution: 'adopt'
-              java-version: ${{ inputs.java-version }}
-              cache: 'maven'
+      with:
+        distribution: 'adopt'
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+
     - name: Install Dependencies
       run: mvn dependency:go-offline
