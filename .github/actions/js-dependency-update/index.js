@@ -3,8 +3,8 @@ const exec = require('@actions/exec');
 const github = require('@actions/github');
 
 const setupGit = async () => {
-  await exec.exec(`git config --global user.name "gh-automation"`);
-  await exec.exec(`git config --global user.email "gh-automation@email.com"`);
+  await exec.exec(`git config --global user.name "PadmanabhanSaravanan"`);
+  await exec.exec(`git config --global user.email "g.s.r.padmanabhan@email.com"`);
 };
 
 const validateBranchName = ({ branchName }) =>
