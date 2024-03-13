@@ -12,8 +12,6 @@ This GitHub Actions workflow demonstrates how to use actions within our GitHub A
 
 1. **Checkout Code**: The workflow checks out the code from the repository using the `actions/checkout` action.
 
-2. **Set up JDK:** This step sets up the Java Development Kit (JDK) using the `actions/setup-java@v2` action. It specifies Java version 11 from AdoptOpenJDK and caches Maven dependencies to speed up subsequent builds.
+2. **Build with Maven:** This step executes the `mvn clean install` command to build the Java project using Maven. It cleans the project, resolves dependencies, compiles source code, and packages the application.
 
-3. **Build with Maven:** This step executes the `mvn clean install` command to build the Java project using Maven. It cleans the project, resolves dependencies, compiles source code, and packages the application.
-
-4. **Run tests:** This step runs tests using the `mvn test` command. It executes the unit tests defined in the project to ensure the application behaves as expected.
+3. **Run tests:** This step runs tests using the `mvn test` command. It executes the unit tests defined in the project to ensure the application behaves as expected.
