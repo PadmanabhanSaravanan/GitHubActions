@@ -1,5 +1,5 @@
-name: Cache Java and Java Dependencies
-description: This action allows to cache both Java and Java Dependencies on the pom.xml file
+name: Cache Java and Maven Dependencies
+description: This action allows to cache both Java and Maven Dependencies on the pom.xml file
 
 inputs: 
   java-version:
