@@ -1,4 +1,4 @@
-name: 05 - Using Caching
+name: 13 - Using Caching
 
 on:
   workflow_dispatch:
@@ -40,7 +40,6 @@ jobs:
         if: ${{ inputs.use-cache }}
         id: cache
         with:
-          path: ~/.m2/repository
           key: ${{ steps.cache-key.outputs.CACHE_KEY }}
 
       - name: Install dependencies
@@ -64,7 +63,6 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: ~/.m2/repository
           key: ${{ needs.install-deps.outputs.deps-cache-key }}
 
       - name: Testing
@@ -87,7 +85,6 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: ~/.m2/repository
           key: ${{ needs.install-deps.outputs.deps-cache-key }}
 
       - name: Building
