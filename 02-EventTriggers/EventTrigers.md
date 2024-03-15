@@ -81,3 +81,5 @@ on:
 ```
 
 These examples demonstrate various ways to trigger GitHub Actions workflows based on specific events and conditions. You can customize them to suit your project's needs and automate your development processes effectively.
+
+> Add Documentation Label when there is any change in this directory
