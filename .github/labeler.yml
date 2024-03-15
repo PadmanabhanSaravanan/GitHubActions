@@ -3,4 +3,4 @@
 Documentation:
 - changed-files:
   - any-glob-to-any-file:
-    - 01-SimpleWorkflow/*
+    - 02-EventTriggers/*
