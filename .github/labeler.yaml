@@ -1,0 +1,6 @@
+# Add 'Documentation' label to any file changes within '01-SimpleWorkflow' folder
+
+Documentation:
+- changed-files:
+  - any-glob-to-any-file:
+    - 01-SimpleWorkflow/*
