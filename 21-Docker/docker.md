@@ -29,7 +29,7 @@ Integrating GitHub Actions with Docker allows you to automate Docker-related tas
 # Docker.yaml
 
 ```yaml
-name: 10 - Docker
+name: 21 - Docker
 
 on:
   workflow_dispatch: # Allows triggering the workflow manually from GitHub UI
