@@ -1,4 +1,4 @@
-name: 06 - Artifacts
+name: 14 - Artifacts
 
 on:
   workflow_dispatch
