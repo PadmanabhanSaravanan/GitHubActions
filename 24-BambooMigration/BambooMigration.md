@@ -46,23 +46,15 @@ This command should display the available options and commands.
 * Run the following commands to set up Bamboo Docker container:
 
   ```docker
-  docker network create bamboo
-  docker run --name bamboo-server --rm --detach \
-    --network bamboo \
-    --publish 8085:8085 \
-    atlassian/bamboo-server
+docker network create bamboo
+
+docker run --name bamboo-server --rm --detach --network bamboo --publish 8085:8085 atlassian/bamboo-server
   ```
 
 * Run the following commands to set up PostgreSQL Docker container (if not using an existing PostgreSQL instance):
 
   ```docker
-  docker run --name postgres-db --rm --detach \
-    --network bamboo \
-    --env POSTGRES_PASSWORD=mysecretpassword \
-    --env POSTGRES_USER=bamboo \
-    --env POSTGRES_DB=bamboo \
-    --publish 5432:5432 \
-    postgres
+docker run --name postgres-db --rm --detach --network bamboo --env POSTGRES_PASSWORD=mysecretpassword --env POSTGRES_USER=bamboo --env POSTGRES_DB=bamboo --publish 5432:5432 postgres
   ```
 
 > NOTES
