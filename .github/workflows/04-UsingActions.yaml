@@ -27,3 +27,29 @@ jobs:
       - name: I will execute
         if: ${{ failure() }}
         run: echo "I will print if any previous step fails."
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: build
+    if: failure()
+    steps:
+      - name: Send Notification
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { context, github } = require('@actions/github');
+
+            const repo = context.repo;
+            const workflowRunId = context.runId;
+            const jobName = context.job;
+            const runURL = `${repo.owner}/${repo.repo}/actions/runs/${workflowRunId}`;
+
+            const message = `Workflow "${workflowRunId}" failed on job "${jobName}". Workflow run URL: ${runURL}`;
+
+            github.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
