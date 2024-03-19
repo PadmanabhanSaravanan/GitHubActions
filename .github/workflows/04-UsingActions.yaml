@@ -30,7 +30,7 @@ jobs:
   
   notify:
     runs-on: ubuntu-latest
-    depends: build
+    needs: build
     if: always()
     steps:
       - name: Send mail
