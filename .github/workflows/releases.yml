@@ -1,4 +1,4 @@
-name: 14 - Artifacts
+name: Release
 
 on:
   workflow_dispatch
