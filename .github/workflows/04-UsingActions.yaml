@@ -28,22 +28,22 @@ jobs:
         if: ${{ failure() }}
         run: echo "I will print if any previous step fails."
 
-- name: Send mail
-  depends: build
-  if: always()
-  uses: dawidd6/action-send-mail@v2
-  with:
-    # mail server settings
-    server_address: smtp.gmail.com
-    server_port: 465
-    # user credentials
-    username: ${{ g.s.r.padmanabhan@gmail.com }}
-    password: ${{ P@dhu123 }}
-    # email subject
-    subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
-    # email body as text
-    body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
-    # comma-separated string, send email to
-    to: vijay.nvb@gmail.com
-    # from email name
-    from: Padmanabhan 
+      - name: Send mail
+        depends: build
+        if: always()
+        uses: dawidd6/action-send-mail@v2
+        with:
+          # mail server settings
+          server_address: smtp.gmail.com
+          server_port: 465
+          # user credentials
+          username: ${{ g.s.r.padmanabhan@gmail.com }}
+          password: ${{ P@dhu123 }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} has ${{ job.status }}
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+          # comma-separated string, send email to
+          to: vijay.nvb@gmail.com
+          # from email name
+          from: Padmanabhan 
