@@ -36,7 +36,7 @@ jobs:
       - name: Send Notification
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { context, github } = require('@actions/github');
 
