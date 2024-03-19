@@ -29,19 +29,15 @@ git checkout -b <branch_name>
 
 **Step 5: Make Changes**
 
-Edit the file(s) in your preferred text editor. For example, using Vim:
-
-```vim
-vim hello.py
-```
+Edit the `Readme` file.
 
 **Step 6: Stage and Commit Changes**
 
 Stage your changes and commit them with a descriptive message:
 
 ```git
-git add hello.py
-git commit -m "Changed print statement to "Hello YouTube"
+git add readme.md
+git commit -m "Hello from New branch"
 ```
 
 **Step 7: Push Changes to GitHub**
