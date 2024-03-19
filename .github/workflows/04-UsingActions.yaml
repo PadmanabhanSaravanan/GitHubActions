@@ -27,10 +27,13 @@ jobs:
       - name: I will execute
         if: ${{ failure() }}
         run: echo "I will print if any previous step fails."
-
+  
+  notify:
+    runs-on: ubuntu-latest
+    depends: build
+    if: always()
+    steps:
       - name: Send mail
-        depends: build
-        if: always()
         uses: dawidd6/action-send-mail@v2
         with:
           # mail server settings
