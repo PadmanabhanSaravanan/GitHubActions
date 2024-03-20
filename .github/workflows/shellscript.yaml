@@ -1,0 +1,15 @@
+name: 00-Run-Shells-Script
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        run: |
+          chmod +x ./test.sh
+          ./test.sh
+        shell: bash
