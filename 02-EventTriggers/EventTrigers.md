@@ -40,36 +40,10 @@ Example YAML:
 ```yaml
 on:
   schedule:
-    - cron: '0 0 * * *' # Run every day at midnight UTC
+    - cron: '5/* 0 * * *' # Run every 5 min
 ```
 
-## 4. Issue Comment Events
-
-Trigger workflows when comments are made on issues or pull requests.
-
-Example YAML:
-
-```yaml
-on:
-  issue_comment:
-    types:
-      - created
-```
-
-## 5. Webhook Events
-
-Trigger workflows in response to custom webhook payloads sent to your repository.
-
-Example YAML:
-
-```yaml
-on:
-  repository_dispatch:
-    types:
-      - my-custom-event
-```
-
-## 6. Manual Triggers
+## 4. Manual Triggers
    
 Allow manual triggering of workflows through the GitHub Actions UI or API.
 

@@ -14,16 +14,3 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '11'
-
-      - name: Build with Maven
-        run: mvn clean install -Dmaven.test.skip=true
-        
-      - name: Run tests
-        run: mvn test
-
-      - name: I will be skipped
-        if: ${{ success() }}
-        run: echo "I will print if previous steps succeed."
-      - name: I will execute
-        if: ${{ failure() }}
-        run: echo "I will print if any previous step fails."
