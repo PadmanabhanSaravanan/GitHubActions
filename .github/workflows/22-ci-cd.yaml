@@ -51,11 +51,8 @@ jobs:
     - name: Push image to Docker Hub
       run: docker push padmanabhan1/todoapp
 
-    - name: Set up kubectl
-      uses: azure/k8s-set-context@v4
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
-
     - name: Deploy to Kubernetes
-      run: kubectl apply -f deployment.yaml
+      run: kubectl apply -f new-deployment.yaml
+
+    - name: Display all deployment and services
+      run: kubectl get all -o wide
