@@ -27,6 +27,6 @@ spec:
     app: todo-app
   ports:
     - protocol: TCP
-port: 8081
+      port: 8081
       targetPort: 8081
   type: NodePort
