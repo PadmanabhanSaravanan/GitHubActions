@@ -1,8 +1,8 @@
-name: 22 - CI CD Pipeline for TodoApp
+name: 22-CI/CD Pipeline for TodoApp
 
 on:
   workflow_dispatch:
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
       with:
         name: my-artifact
         path: target/
-        
+
   deploy:
     runs-on: self-hosted
     needs: build
@@ -41,7 +41,7 @@ jobs:
       with:
         name: my-artifact
         path: target/
-           
+
     - name: Build Docker image
       run: docker build -t padmanabhan1/todoapp .
 
