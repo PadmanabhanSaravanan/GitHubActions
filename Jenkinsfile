@@ -1,7 +1,9 @@
 pipeline {
-    agent any
-    options {
-        skipStagesAfterUnstable()
+    agent {
+        docker {
+            image 'maven:3.9.0'
+            args '-v /root/.m2:/root/.m2'
+        }
     }
     stages {
         stage('Build') {
@@ -19,9 +21,9 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') { 
+        stage('Deliver') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                sh './jenkins/scripts/deliver.sh'
             }
         }
     }
