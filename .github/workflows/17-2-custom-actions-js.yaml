@@ -12,10 +12,10 @@ on:
         default: update-dependencies
       working-dir:
         type: string
-        default: 08-CustomActions/react-app
+        default: 17-CustomActions/react-app
       debug:
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: write
