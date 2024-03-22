@@ -1,4 +1,4 @@
-name: 22-CI/CD Pipeline for TodoApp
+name: 22-01-CI/CD Pipeline
 
 on:
   workflow_dispatch:
@@ -7,9 +7,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    # Custom Action
-    - name: Checkout repository and Setup Java
-      uses: PadmanabhanSaravanan/GitHubActions@master/.github/actions/composite-checkout-build
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java 
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        cache: 'maven'
 
     - name: Build with Maven
       run: mvn clean install -Dmaven.test.skip=true
@@ -23,7 +29,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository and Setup Java
-      uses: PadmanabhanSaravanan/GitHubActions@master/.github/actions/composite-checkout-build
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java 
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        cache: 'maven'
     - name: Test with Maven
       run: mvn -B test
