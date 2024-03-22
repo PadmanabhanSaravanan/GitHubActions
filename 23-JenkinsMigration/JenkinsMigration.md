@@ -1,381 +1,97 @@
 # Jenkins to Github Actions Migration 
 
-* [**Creating Github repository with github actions enabled**](#creating-github-repository-with-github-actions-enabled) 
-* [**Translate Jenkins Jobs to github action workflows**](#translate-jenkins-jobs-to-github-action-workflows)
-* [**Secrets and Environment Variables**](#secrets-and-environment-variables)
-* [**Testing with Github actions**](#testing-with-github-actions) 
-* [**Gradual migration and retiring Jenkins**](#gradual-migration-and-retiring-jenkins)
-* [**Migrating from Jenkins with GitHub Actions Importer**](#migrating-from-jenkins-with-github-actions-importer) 
-
-## Creating Github repository with github actions enabled 
-
-There are two options to create a GitHub repository with GitHub Actions enabled: using the GitHub CLI (`gh`) or enabling GitHub Actions through the web UI.
-
-**Using GitHub CLI (gh)**
-
-If you prefer using the GitHub CLI (`gh`), you can follow these steps:
-
-**1. Install GitHub CLI (`gh`):**
-
-* You can download and install `gh` from the GitHub CLI releases page: [GitHub CLI Releases](https://cli.github.com/).
-
-**2. Authenticate with GitHub:**
-
-* Run `gh auth login` and follow the prompts to authenticate with your GitHub account.
-
-  ![image gh](../images/gh.png)
-
-**3. Create a New Repository with GitHub Actions Enabled:**
-
-* Run the following command to create a new repository with GitHub Actions enabled:
-
-  ```gh
-  gh repo create <repository_name> --enable-actions
-  ```
-
-* Replace <repository_name> with the name you want for your new repository.
-
-**Using GitHub Web UI**
-
-If you prefer using the GitHub web interface, you can enable GitHub Actions when creating a new repository:
-
-**1. Navigate to GitHub:**
-
-* Open your web browser and go to GitHub.
-
-**2. Create a New Repository:**
-
-* Click on the "+" icon in the top right corner and select "New repository".
-
-**3. Fill in Repository Details:**
-
-* Enter the repository name, description, and choose whether the repository should be public or private.
-
-**4. Enable GitHub Actions:**
-
-* Check the option "Initialize this repository with a README".
-* Select a license if needed.
-* Check the option "Add a workflow" and choose a template from the dropdown. This will enable GitHub Actions for your repository.
-
-**5. Create Repository:**
-
-* Click on the "Create repository" button to finalize the creation of your repository with GitHub Actions enabled.
-
-## Translate Jenkins Jobs to github action workflows
-
-A pipeline Jenkins job defines a series of stages and steps within each stage. To translate this to GitHub Actions:
-
-* Identify the stages and steps defined in the Jenkins pipeline.
-* Use the jobs and steps syntax in GitHub Actions to define each stage and step.
-
-**Jenkins Pipeline Explanation:**
-
-* **Agent**: Specifies the execution environment for the pipeline. In this case, it's set to "any", meaning the pipeline can run on any available agent.
-* **Stages**: Defines the different stages of the pipeline.
-
-  * **Build**: Runs the Maven `clean install` command to build the project.
-  * **Test**: Executes Maven `test` command to run the project's unit tests.
-  * **Deploy**: Runs Maven `deploy` command to deploy the built artifact.
-
-
-```yaml
-# Jenkins Pipeline Example
-pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sh 'mvn deploy'
-            }
-        }
-    }
-}
-```
-
-**Equivalent GitHub Actions Workflow Explanation:**
-
-* Name: Specifies the name of the GitHub Actions workflow.
-* On: Defines the event(s) that trigger the workflow. In this case, it triggers on push events to the main branch.
-* Jobs: Defines the jobs that run within the workflow.
-
-  * Build: Represents the build stage.
-    
-    * Runs-on: Specifies the type of virtual environment the job runs on. Here, it's set to ubuntu-latest.
-
-  * Steps: Defines the sequence of steps to execute within the job.
-
-    * Checkout code: Uses the actions/checkout action to check out the repository's code.
-
-    * Build: Runs the Maven clean install command to build the project.
-
-    * Test: Runs the Maven test command to execute unit tests.
-
-    * Deploy: Executes the Maven deploy command to deploy the built artifact.
-
-```yaml
-# Equivalent GitHub Actions Workflow
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Build
-        run: mvn clean install
-
-      - name: Test
-        run: mvn test
-
-      - name: Deploy
-        run: mvn deploy
-```
-
-## Secrets and Environment Variables
-
-**Secrets**
-
-Secrets in GitHub Actions are encrypted environment variables that you can use to store sensitive information such as API keys, access tokens, or passwords. These secrets are encrypted and securely stored, allowing you to use them in your workflows without exposing them in your repository.
-
-Adding Secrets to Your Repository
-
-**1. Navigate to Repository Settings:**
-
-* Go to your GitHub repository.
-* Click on "Settings" in the top-right corner.
-* Select "Secrets" from the left sidebar.
-
-**2. Add New Secret:**
-
-* Click on "New repository secret".
-* Enter the name and value for your secret.
-* Click "Add secret" to save it.
-
-**Accessing Secrets in Workflows**
-
-You can access secrets in your GitHub Actions workflows using the `secrets` context. For example:
-
-```yaml
-name: CI Workflow
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use Secret
-        run: echo ${{ secrets.MY_SECRET }}
-```
-
-**Environment Variables**
-
-Environment variables in GitHub Actions are key-value pairs that you can use to pass data between steps in a workflow or customize the behavior of your workflow.
-
-**Setting Environment Variables in Workflows**
-
-You can set environment variables directly in your workflow YAML file using the `env` keyword. For example:
-
-```yaml
-name: CI Workflow
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      MY_VARIABLE: 'my_value'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use Environment Variable
-        run: echo $MY_VARIABLE
-```
-
-**Using Secrets as Environment Variables**
-
-You can also use secrets as environment variables in your workflows by setting them in the `env` section of your job. For example:
-
-```yaml
-name: CI Workflow
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      MY_SECRET: ${{ secrets.MY_SECRET }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use Secret as Environment Variable
-        run: echo $MY_SECRET
-```
-
-## Testing with Github actions 
-
-Testing a Java application using GitHub Actions involves setting up workflows to automate the build and test processes. Below is an example of a GitHub Actions workflow for testing a Java application:
-
-```yaml
-name: Java CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-
-    - name: Run Tests
-      run: mvn test
-```
-
-This workflow will trigger on every push to the `main` branch and on every pull request targeting the `main` branch. It sets up the required JDK version, builds the Java application using Maven, and then runs the tests using Maven.
-
-## Gradual migration and retiring Jenkins
-
-Gradual migration from Jenkins to GitHub Actions involves transitioning your CI/CD workflows, pipelines, and jobs from Jenkins to GitHub Actions over time, while ensuring minimal disruption to your development and deployment processes. Here's a step-by-step guide on how to approach gradual migration and eventually retire Jenkins:
-
-**1. Assess Your Jenkins Setup**
-
- * Analyze your existing Jenkins pipelines, jobs, configurations, and dependencies.
- * Identify the critical pipelines and jobs that need to be migrated first.
-
-**2. Set Up GitHub Actions**
-
-Familiarize yourself with GitHub Actions and its capabilities.
-Create a plan for how you'll structure your workflows in GitHub Actions.
-
-**3. Migrate Non-Critical Jobs**
-
-Start by migrating non-critical jobs or pipelines from Jenkins to GitHub Actions.
-Rewrite the Jenkins pipelines as GitHub Actions workflows.
-Test the migrated workflows thoroughly to ensure they function as expected.
-
-**4. Run Parallel Workflows**
-
-Run both Jenkins and GitHub Actions workflows in parallel for critical pipelines.
-Compare the results of both workflows to ensure consistency.
-Gradually increase the number of workflows migrated to GitHub Actions as confidence grows.
-
-**5. Update Documentation and Processes**
-
-Update documentation, runbooks, and internal processes to reflect the transition to GitHub Actions.
-Train team members on using GitHub Actions and any new processes.
-
-**6. Monitor and Iterate**
-
-Monitor the performance and reliability of GitHub Actions workflows.
-Gather feedback from team members and stakeholders.
-Iterate on workflows based on feedback and evolving requirements.
-
-**7. Retire Jenkins**
-
-Once all critical pipelines and jobs have been successfully migrated to GitHub Actions and validated, plan for the retirement of Jenkins.
-Inform stakeholders about the retirement plan and timeline.
-Decommission Jenkins infrastructure and services after ensuring all necessary data and configurations have been migrated or backed up.
-
-**8. Post-Migration Cleanup**
-
-Remove any leftover Jenkins configurations, jobs, or plugins.
-Update integrations, tools, and services that were dependent on Jenkins.
-Perform a final review to ensure all dependencies on Jenkins have been addressed.
+## Prerequisites
+
+* **Jenkins Account or Organization:** You need access to a Jenkins account or organization where pipelines and jobs you want to convert are located.
+* **GitHub Account:** You need a GitHub account where you'll be migrating the Jenkins pipelines to GitHub Actions.
+* **Access to Create a Jenkins Personal API Token:** You'll need to create a personal API token in Jenkins to authenticate with the Jenkins server during migration.
+* **Environment with Linux-Based Containers and Docker Installed:** Ensure you have an environment where you can run Linux-based containers with Docker installed.
+* **GitHub Personal Access Token:** Create a GitHub personal access token with the "workflow" scope to authenticate with GitHub during migration.
+* **Access to GitHub CLI:** Make sure GitHub CLI (gh) is installed and accessible in your environment.
+* **Network Access:** Ensure network access to Jenkins server from the environment where migration commands will be executed.
+* **Jenkins Plugin Installation:** Install the "paginated-builds" plugin on your Jenkins server to facilitate data retrieval for forecasting.
+* **Custom Docker Image (Optional):** If you plan to use a custom Docker image for running Jenkins, ensure it's available and properly configured.
+* **GitHub Repository:** Have a GitHub repository where you'll be migrating the Jenkins pipelines to GitHub Actions.
 
 ## Migrating from Jenkins with GitHub Actions Importer
 
-**Prerequisites:**
-
-1. You need a Jenkins account or organization with pipelines and jobs you want to convert.
-2. Access to create a Jenkins personal API token.
-3. An environment where you can run Linux-based containers with Docker and GitHub CLI installed.
-
-* [**Installing GitHub Actions Importer CLI Extension:**](#installing-github-actions-importer-cli-extension)
+* [**Installing GitHub Actions Importer CLI Extension**](#installing-github-actions-importer-cli-extension)
+* [**Setup Jenkins**](#setup-jenkins)
 * [**Perform an audit of Jenkins**](#perform-an-audit-of-jenkins)
 * [**Forecast potential build runner usage**](#forecast-potential-build-runner-usage)
 * [**Perform a dry run migration of a Jenkins pipeline**](#perform-a-dry-run-migration-of-a-jenkins-pipeline)
 * [**Perform a production migration of a Jenkins pipeline**](#perform-a-production-migration-of-a-jenkins-pipeline)
 
-### **Installing GitHub Actions Importer CLI Extension:**
+### **Installing GitHub Actions Importer CLI Extension**
 
-1. Install the GitHub Actions Importer CLI extension using the command:
+**1. Install GitHub Actions Importer CLI extension:**
+
+Before installing action importer , install github cli [link](https://cli.github.com/)
+
+Use the provided command to install the GitHub Actions Importer CLI extension, which will enable you to migrate Jenkins pipelines to GitHub Actions.
 
 ```gh
 gh extension install github/gh-actions-importer
 ```
 
-2. Verify the installation by running:
+**2. Verify the installation:**
+
+After installation, verify that the extension is installed correctly by running:
 
 ```gh
 gh actions-importer -h
 ```
 
-**Configuring Credentials:**
+#### **Running Jenkins on Docker Windows Host Machine**
 
-1. Create a GitHub personal access token with the workflow scope.
-2. Create a Jenkins API token.
-3. Run the GitHub Actions Importer configure command:
+**1. Create Docker Network:**
 
-```gh
-gh actions-importer configure
+Create a Docker network named "jenkins" to allow communication between containers.
+
+```docker
+docker network create jenkins
 ```
 
-Provide the required information:
+**2. Run Docker Daemon Exposed with Port 2376:**
 
-* Select Jenkins as the CI provider.
-* Enter GitHub personal access token.
-* Accept the default GitHub base URL.
-* Enter Jenkins API token, username, and Jenkins base URL.
+Start a Docker daemon with necessary configurations for Jenkins usage.
+
+```docker
+docker run --name jenkins-docker --rm --detach ^
+--privileged --network jenkins --network-alias docker ^
+--env DOCKER_TLS_CERTDIR=/certs ^
+--volume jenkins-docker-certs:/certs/client ^
+--volume jenkins-data:/var/jenkins_home ^
+--publish 2376:2376 ^
+docker:dind
+```
+
+**3. Run Jenkins Image:**
+
+Start Jenkins container using a custom image or the official Jenkins image, ensuring it's properly configured.
+
+```docker
+docker run --name jenkins-blueocean --restart=on-failure --detach ^
+--network jenkins --env DOCKER_HOST=tcp://docker:2376 ^
+--env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 ^
+--volume jenkins-data:/var/jenkins_home ^
+--volume jenkins-docker-certs:/certs/client:ro ^
+--publish 8080:8080 --publish 50000:50000 vijaynvb/jenkins:1.0
+```
+
+**Setup admin details**
+
+- Access the jenkins application in localhost:8080
+- Login with default credentials - To get the password , go to the shown directory or simply run docker logs containerId & get the password from logs.
+- Install suggested plugins
+- Create new user 'administrator' with password '**\*\*\*\***'
+- Now start jenkins
+
+#### **Configuring Credentials**
+
+**1. Create GitHub Personal Access Token:**
+
+Generate a GitHub personal access token with the `"workflow"`,`"contents"`,`"Pull Request"`,`"Metadata"` scope from your GitHub account settings. This token will be used to authenticate GitHub Actions Importer with GitHub.
 
 > Notes:
 > 
@@ -385,9 +101,19 @@ Provide the required information:
 > * Navigate to the "Developer settings" section.
 > * Click on "Personal access tokens."
 > * Click on "Generate new token."
-> * Give your token a name and select the required scopes, ensuring the "workflow" scope is included.
+> * Give your token a name and select the required scopes, ensuring the "workflow","contents","Pull Request","Metadata" scope is included.
 > * Click on "Generate token" and copy the generated token. Save it in a secure location as it will not be displayed again.
-> 
+
+**Perssions required for GitHub Personal Access Token**
+
+![alt text](../23-JenkinsMigration/image.png)
+
+**2. Create Jenkins API Token:**
+
+Log in to your Jenkins instance and generate an API token from your user profile or settings. This token will be used to authenticate GitHub Actions Importer with Jenkins.
+
+> Notes:
+>
 > Finding Jenkins API Token and Base URL:
 > 
 > * Log in to your Jenkins instance.
@@ -397,22 +123,96 @@ Provide the required information:
 > 
 > Jenkins Base URL:
 > 
-> * The Jenkins base URL is simply the URL of your Jenkins instance. It typically follows the format http://your-jenkins-domain.com or http://localhost:8080 if running locally.
+> * The Jenkins base URL is simply the URL of your Jenkins instance. It typically follows the format http://your-jenkins-domain.com or http://localhost:8080 if running locally. ( use system ip address instead of localhost , ipconfig )
 > * Ensure you have the correct URL, including the protocol (http/https) and port number if applicable.
 
-**Updating Container Image:**
+**3. Configure GitHub Actions Importer:**
 
-Run the GitHub Actions Importer update command to update the container image:
+Run the configuration command provided below, and follow the prompts to configure GitHub Actions Importer with the necessary credentials.
+
+```gh
+gh actions-importer configure
+```
+
+Provide the required information:
+
+* Select Jenkins as the CI provider.
+* Enter the GitHub personal access token.
+* Accept the default GitHub base URL.
+* Enter the Jenkins API token, username, and Jenkins base URL.
+
+![alt text](../23-JenkinsMigration/image-1.png)
+
+#### **Updating Container Image**
+
+Update the container image for GitHub Actions Importer if needed.
 
 ```gh
 gh actions-importer update
 ```
 
+These steps provide a seamless way to install GitHub Actions Importer, configure credentials, set up Jenkins on Docker, and update the necessary container images.
+
+### **Setup Jenkins**
+
+**Create your Pipeline project in Jenkins**
+
+* In Jenkins, select **New Item** under **Dashboard >** at the top left.
+* Enter your new Pipeline project name in **Enter an item name**(`Build-Java`).
+* Scroll down if necessary and select **Pipeline**, then select OK at the end of the page.
+* (Optional) Enter a Pipeline **Description**.
+* Select **Pipeline** on the left pane.
+
+![alt text](../23-JenkinsMigration/image-2.png)
+
+* Select Definition, and then choose the **Pipeline script from SCM** option. This option instructs Jenkins to obtain your Pipeline from the source control management (SCM), which is your forked Git repository.
+* Choose **Git** from the options in SCM.
+* Enter the URL of your repository in **Repositories/Repository URL**.(`https://github.com/vijaynvb/gh_lab.git`)
+* Select Save at the end of the page. You’re now ready to create a Jenkinsfile to check into your locally cloned Git repository.
+
+**Jenkinfile**
+
+* Create a `Jenkinfile` in your repository and add the below script and push the script to your repository
+
+```Jenkinfile
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -B -DskipTests clean package'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Deliver') {
+            steps {
+                sh './jenkins/scripts/deliver.sh'
+            }
+        }
+    }
+}
+```
+
 ### **Perform an audit of Jenkins**
 
-To perform an audit of a Jenkins server using the GitHub Actions Importer, follow these steps:
+You can use the `audit` command to get a high-level view of all pipelines in a Jenkins server.
 
-**Run the Audit Command:**
+The `audit` command performs the following steps:
+
+* Fetches all of the projects defined in a Jenkins server.
+* Converts each pipeline to its equivalent GitHub Actions workflow.
+* Generates a report that summarizes how complete and complex of a migration is possible with GitHub Actions Importer.
+
+#### **Run the Audit Command**
 
 Open your terminal and run the following command:
 
@@ -420,35 +220,87 @@ Open your terminal and run the following command:
 gh actions-importer audit jenkins --output-dir tmp/audit
 ```
 
-**Inspect Audit Results:**
+![alt text](../23-JenkinsMigration/image-3.png)
 
-After running the command, inspect the files in the specified output directory (tmp/audit). Here's what you'll find:
+* `gh actions-importer audit jenkins:` This part of the command invokes the GitHub Actions Importer to perform an audit on Jenkins pipelines.
+* `--output-dir tmp/audit:` This flag specifies the output directory where the audit results will be stored. In this case, it's set to `tmp/audit`.
 
-* **audit_summary.md**: This file contains a summary of the audit results, including information on pipelines, build steps, and manual tasks.
+#### **Inspect Audit Results**
 
-* **Pipelines**: This section provides statistics regarding the conversion rate of pipelines. It categorizes pipelines as successful, partially successful, unsupported, or failed.
+The files in the specified output directory contain the results of the audit. See the `audit_summary.md` file for a summary of the audit results.
 
-* **Build steps**: This section offers an overview of individual build steps used across all pipelines and indicates how many were automatically converted by the GitHub Actions Importer.
+**The audit summary has the following sections.**
 
-* **Manual tasks**: This section lists tasks that cannot be completed automatically and require manual intervention, such as creating secrets or defining self-hosted runners.
+* **Pipelines**
 
-* **Files**: This section provides a manifest of all the files written to disk during the audit, including original pipeline files, network responses, converted workflow files, and stack traces.
+  The "Pipelines" section contains a high-level statistics regarding the conversion rate done by GitHub Actions Importer.
 
-* **workflow_usage.csv**: This file contains a comma-separated list of all actions, secrets, and runners used by each successfully converted pipeline. It helps determine which workflows use specific resources and aids in security reviews.
+  Listed below are some key terms that can appear in the "Pipelines" section:
+
+  * **Successful** pipelines had 100% of the pipeline constructs and individual items converted automatically to their GitHub Actions equivalent.
+  * **Partially successful** pipelines had all of the pipeline constructs converted, however, there were some individual items that were not converted automatically to their GitHub Actions equivalent.
+  * **Unsupported** pipelines are definition types that are not supported by GitHub Actions Importer.
+  * **Failed** pipelines encountered a fatal error when being converted. This can occur for one of three reasons:
+
+    * The pipeline was misconfigured and not valid.
+    * GitHub Actions Importer encountered an internal error when converting it.
+    * There was an unsuccessful network response that caused the pipeline to be inaccessible, which is often due to invalid credentials.
+
+* **Build steps**
+
+  The "Build steps" section contains an overview of individual build steps that are used across all pipelines, and how many were automatically converted by GitHub Actions Importer.
+
+  Listed below are some key terms that can appear in the "Build steps" section:
+
+  * A **known** build step is a step that was automatically converted to an equivalent action.
+  * An **unknown** build step is a step that was not automatically converted to an equivalent action.
+  * An **unsupported** build step is a step that is either
+
+    * Fundamentally not supported by GitHub Actions.
+    * Configured in a way that is incompatible with GitHub Actions.
+
+  * An **action** is a list of the actions that were used in the converted workflows. This can be important for:
+
+    * If you use GitHub Enterprise Server, gathering the list of actions to sync to your instance.
+    * Defining an organization-level allowlist of actions that are used. This list of actions is a comprehensive list of actions that your security or compliance teams may need to review.
+
+* **Manual tasks**
+
+  The "Manual tasks" section contains an overview of tasks that GitHub Actions Importer is not able to complete automatically, and that you must complete manually.
+
+  Listed below are some key terms that can appear in the "Manual tasks" section:
+
+  * A **secret** is a repository or organization-level secret that is used in the converted pipelines. These secrets must be created manually in GitHub Actions for these pipelines to function properly.
+  * A **self-hosted** runner refers to a label of a runner that is referenced in a converted pipeline that is not a GitHub-hosted runner. You will need to manually define these runners for these pipelines to function properly.
+
+* **Files**
+
+  The final section of the audit report provides a manifest of all the files that were written to disk during the audit.
+  
+  Each pipeline file has a variety of files included in the audit, including:
+
+  * The original pipeline as it was defined in GitHub.
+  * Any network responses used to convert the pipeline.
+  * The converted workflow file.
+  * Stack traces that can be used to troubleshoot a failed pipeline conversion.
+
+Additionally, the `workflow_usage.csv` file contains a comma-separated list of all actions, secrets, and runners that are used by each successfully converted pipeline. This can be useful for determining which workflows use which actions, secrets, or runners, and can be useful for performing security reviews.
 
 ### **Forecast potential build runner usage**
 
-To forecast potential GitHub Actions usage by computing metrics from completed pipeline runs in your Jenkins server, follow these steps:
+You can use the `forecast` command to forecast potential GitHub Actions usage by computing metrics from completed pipeline runs in your Jenkins server.
+
+The purpose of running the `forecast` command is to analyze historical data from Jenkins pipelines and generate insights that can aid in planning the migration process to GitHub Actions.
 
 **Prerequisites:**
 
 Install the paginated-builds plugin on your Jenkins server. This plugin allows GitHub Actions Importer to efficiently retrieve historical build data for jobs with a large number of builds.
 
-* Navigate to your Jenkins instance's plugin manager at https://<your-jenkins-instance>/pluginManager/available.
-* Search for the "paginated-builds" plugin.
-* Check the box next to it and select "Install without restart".
+* Navigate to your Jenkins instance's plugin manager at `https://<your-jenkins-instance>/pluginManager/available`.
+* Search for the `"paginated-builds"` plugin.
+* Check the box next to it and select `"Install without restart"`.
 
-**Running the Forecast Command:**
+#### **Running the Forecast Command**
 
 Open your terminal and run the following command:
 
@@ -456,53 +308,89 @@ Open your terminal and run the following command:
 gh actions-importer forecast jenkins --output-dir tmp/forecast
 ```
 
-**Inspecting the Forecast Report:**
+![alt text](../23-JenkinsMigration/image-4.png)
 
-After running the command, inspect the forecast_report.md file located in the specified output directory (tmp/forecast).
+* `gh actions-importer forecast jenkins`: This part of the command instructs the GitHub CLI tool to run the forecast functionality specifically for Jenkins pipelines. The GitHub Actions Importer tool is designed to analyze Jenkins pipelines and provide insights into potential migration to GitHub Actions.
 
-The forecast report contains metrics such as:
+* `--output-dir tmp/forecast`: This flag specifies the output directory where the forecast analysis results will be stored. In this case, it's set to `tmp/forecast`. The forecast analysis generates various metrics and reports, which are saved in this directory for further inspection.
 
-* Job count: Total number of completed jobs.
-* Pipeline count: Number of unique pipelines used.
-* Execution time: Amount of time a runner spent on a job, correlated to GitHub Actions cost estimation.
-* Queue time metrics: Amount of time a job spent waiting for a runner to be available.
-* Concurrent jobs metrics: Number of jobs running simultaneously, helping to define the number of runners to configure.
+#### **Inspecting the Forecast Report**
 
-Additionally, metrics are defined for each queue of runners in Jenkins, useful if there's a mix of hosted or self-hosted runners or different machine specifications.
+The `forecast_report.md` file in the specified output directory contains the results of the forecast.
+
+Listed below are some key terms that can appear in the forecast report:
+
+* The `job count` is the total number of completed jobs.
+* The `pipeline count` is the number of unique pipelines used.
+* `Execution time` describes the amount of time a runner spent on a job. This metric can be used to help plan for the cost of GitHub-hosted runners.
+
+  * This metric is correlated to how much you should expect to spend in GitHub Actions. This will vary depending on the hardware used for these minutes. 
+
+* `Queue time` metrics describe the amount of time a job spent waiting for a runner to be available to execute it.
+* `Concurrent jobs` metrics describe the amount of jobs running at any given time. This metric can be used to define the number of runners you should configure.
+
+Additionally, these metrics are defined for each queue of runners in Jenkins. This is especially useful if there is a mix of hosted or self-hosted runners, or high or low spec machines, so you can see metrics specific to different types of runners.
 
 ### **Perform a dry run migration of a Jenkins pipeline**
 
-To perform a dry-run migration of a Jenkins pipeline to GitHub Actions, follow these steps:
+The purpose of running the `dry-run` command is to simulate the migration of a Jenkins pipeline to GitHub Actions without actually making any changes to the pipeline or repository. It allows users to preview how their pipelines would be converted and assess the feasibility of migration.
 
-**Running the Dry-Run Command:**
+#### **Running the Dry-Run Command**
 
 * Open your terminal.
-* Run the following command, replacing my-jenkins-project with the URL of your Jenkins job:
+* Run the following command, replacing `https://jenkins.xyz/job/:job_name` with the URL of your Jenkins job:
 
   ```gh
-  gh actions-importer dry-run jenkins --source-url my-jenkins-project --output-dir tmp/dry-run
+  gh actions-importer dry-run jenkins --source-url http://192.168.0.85:8080/job/Build-Java/ --output-dir tmp/dry-run
   ```
 
-**Inspecting the Converted Workflows:**
+![alt text](../23-JenkinsMigration/image-5.png)
+
+  * `gh actions-importer dry-run jenkins`: This part of the command instructs the GitHub CLI tool to perform a dry run migration specifically for Jenkins pipelines. The dry run simulation allows users to see how their Jenkins pipeline would be converted into GitHub Actions workflows without making any actual changes to the pipeline or repository.
+
+  * `--source-url https://jenkins.xyz/job/:job_name`: This flag specifies the source URL of the Jenkins project that you want to migrate. Replace `https://jenkins.xyz/job/:job_name` with the `actual URL` of your Jenkins project.
+
+  * `--output-dir tmp/dry-run`: This flag specifies the output directory where the results of the dry run migration will be stored. In this case, it's set to `tmp/dry-run`. The dry run process generates files and logs that represent the converted GitHub Actions workflows and other relevant information.
+
+#### **Inspecting the Converted Workflows**
+
+![alt text](../23-JenkinsMigration/image-8.png)
 
 * After running the command, you can inspect the logs of the dry run and the converted workflow files in the specified output directory (tmp/dry-run).
 * Within the output directory, you'll find the converted workflow files generated by the dry run process. These files represent the GitHub Actions workflows equivalent to your Jenkins pipelines.
 
 ### **Perform a production migration of a Jenkins pipeline**
 
-To perform a production migration of a Jenkins pipeline to GitHub Actions, follow these steps:
+You can use the `migrate` command to convert a Jenkins pipeline and open a pull request with the equivalent GitHub Actions workflow.
 
-**Running the Migrate Command:**
+#### **Running the Migrate Command**
 
 * Open your terminal.
-* Run the following command, replacing :owner with your GitHub username or organization name, :repo with your repository name, and my-jenkins-project with the URL of your Jenkins job:
+* To migrate a Jenkins pipeline to GitHub Actions, run the following command in your terminal, replacing the `target-url` value with the `URL` for your **GitHub repository**, and `my-jenkins-project` with the `URL` for your **Jenkins job**.
 
   ```gh
-  gh actions-importer migrate jenkins --target-url https://github.com/:owner/:repo --output-dir tmp/migrate --source-url my-jenkins-project
+   gh actions-importer migrate jenkins --target-url https://github.com/vijaynvb/gh_lab --output-dir tmp/migrate --source-url http://192.168.0.85:8080/job/Build-Java/
   ```
 
-**Inspecting the Migration:**
+![alt text](../23-JenkinsMigration/image-6.png)
 
-* After running the command, the GitHub Actions Importer will convert your Jenkins pipeline to its equivalent GitHub Actions workflow.
-* It will also open a pull request in your GitHub repository with the changes.
-* You can review the changes made in the pull request and ensure that the GitHub Actions workflow meets your requirements.
+  * `gh actions-importer migrate jenkins`: This part of the command instructs the GitHub CLI tool to perform the migration specifically for Jenkins pipelines. The migration process involves converting Jenkins pipeline configurations into GitHub Actions workflows.
+
+  * `--target-url https://github.com/:owner/:repo`: This flag specifies the target GitHub repository where the converted GitHub Actions workflows will be created. Replace `:owner` with your GitHub username or organization name and `:repo` with the name of your repository.
+
+  * `--output-dir tmp/migrate`: This flag specifies the output directory where the results of the migration process will be stored. In this case, it's set to `tmp/migrate`. The migration process generates files, logs, and other relevant information, which are stored in this directory.
+
+  * `--source-url https://jenkins.xyz/job/:job_name`: This flag specifies the source URL of the Jenkins project that you want to migrate. Replace `https://jenkins.xyz/job/:job_name` with the `actual URL` of your **Jenkins project**.
+
+#### **Inspecting the pull request**
+
+The output from a successful run of the migrate command contains a link to the new pull request that adds the converted workflow to your repository.
+
+![alt text](../23-JenkinsMigration/image-7.png)
+
+Some important elements of the pull request include:
+
+* In the pull request description, a section called **Manual steps**, which lists steps that you must manually complete before you can finish migrating your pipelines to GitHub Actions. For example, this section might tell you to create any secrets used in your workflows.
+* The converted workflows file. Select the **Files changed** tab in the pull request to view the workflow file that will be added to your GitHub repository.
+
+When you are finished inspecting the pull request, you can merge it to add the workflow to your GitHub repository.
