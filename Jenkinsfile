@@ -1,33 +1,27 @@
 pipeline {
     agent any
-    
+    options {
+        skipStagesAfterUnstable()
+    }
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                checkout scm
-                echo 'Successful checkout'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
-        
-        stage('Build and Docker Image') {
+        stage('Test') {
             steps {
-                script {
-                    def imageTag = "padmanabhan1/todoapp"
-                    docker.build(imageTag, '.')
-                    echo 'Successful Build Docker Image'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
-        
-        stage('Push to Docker Hub') {
+        stage('Deliver') { 
             steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker_hub_cred', url: 'https://index.docker.io/v1/') {
-                        def imageTag = "padmanabhan1/todoapp"
-                        docker.image(imageTag).push()
-                        echo 'Successful Push to Docker Hub'
-                    }
-                }
+                sh './jenkins/scripts/deliver.sh' 
             }
         }
     }
