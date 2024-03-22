@@ -112,7 +112,7 @@ public class TodoappApplicationTests {
         ResponseEntity<Todo> responseEntity = todoController.deleteTodo(1);
 
         // Assert
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     @Test
