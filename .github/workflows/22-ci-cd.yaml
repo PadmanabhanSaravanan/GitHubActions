@@ -1,4 +1,4 @@
-name: 22-01-CI/CD Pipeline
+name: 27-01-CI/CD Pipeline
 
 on:
   workflow_dispatch:
