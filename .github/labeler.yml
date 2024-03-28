@@ -3,4 +3,4 @@
 Documentation:
 - changed-files:
   - any-glob-to-any-file:
-    - 02-EventTriggers/*
+    - 04-EventTriggers/*

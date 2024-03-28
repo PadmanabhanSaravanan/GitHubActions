@@ -2,16 +2,21 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const github = require('@actions/github');
 
+// Function to set up git configuration
 const setupGit = async () => {
-  await exec.exec(`git config --global user.name "PadmanabhanSaravanan"`);
-  await exec.exec(`git config --global user.email "g.s.r.padmanabhan@email.com"`);
+  await exec.exec(`git config --global user.name "YourGitHubUsername"`);
+  await exec.exec(`git config --global user.email "youremail@example.com"`);
 };
 
+// Function to validate branch name
 const validateBranchName = ({ branchName }) =>
   /^[a-zA-Z0-9_\-\.\/]+$/.test(branchName);
+
+// Function to validate directory name
 const validateDirectoryName = ({ dirName }) =>
   /^[a-zA-Z0-9_\-\/]+$/.test(dirName);
 
+// Function to set up logger
 const setupLogger = ({ debug, prefix } = { debug: false, prefix: '' }) => ({
   debug: (message) => {
     if (debug) {
@@ -27,6 +32,7 @@ const setupLogger = ({ debug, prefix } = { debug: false, prefix: '' }) => ({
 });
 
 async function run() {
+  // Retrieving inputs
   const baseBranch = core.getInput('base-branch', { required: true });
   const headBranch = core.getInput('head-branch', { required: true });
   const ghToken = core.getInput('gh-token', { required: true });
@@ -34,13 +40,12 @@ async function run() {
   const debug = core.getBooleanInput('debug');
   const logger = setupLogger({ debug, prefix: '[js-dependency-update]' });
 
-  const commonExecOpts = {
-    cwd: workingDir,
-  };
+  // Setting GitHub token as a secret
   core.setSecret(ghToken);
 
   logger.debug('Validating inputs base-branch, head-branch, working-directory');
 
+  // Validating branch and directory names
   if (!validateBranchName({ branchName: baseBranch })) {
     core.setFailed(
       'Invalid base-branch name. Branch names should include only characters, numbers, hyphens, underscores, dots, and forward slashes.'
@@ -67,15 +72,18 @@ async function run() {
   logger.debug(`Working directory is ${workingDir}`);
 
   logger.debug('Checking for package updates');
+
+  // Running npm update
   await exec.exec('npm update', [], {
-    ...commonExecOpts,
+    cwd: workingDir,
   });
 
+  // Checking git status for package.json files
   const gitStatus = await exec.getExecOutput(
     'git status -s package*.json',
     [],
     {
-      ...commonExecOpts,
+      cwd: workingDir,
     }
   );
 
@@ -86,23 +94,27 @@ async function run() {
 
     logger.debug('There are updates available!');
     logger.debug('Setting up git');
+
+    // Setting up git configuration
     await setupGit();
 
-    logger.debug('Committing and pushing package*.json changes');
+    // Creating a new branch, adding and committing changes, and pushing to remote
     await exec.exec(`git checkout -b ${headBranch}`, [], {
-      ...commonExecOpts,
+      cwd: workingDir,
     });
     await exec.exec(`git add package.json package-lock.json`, [], {
-      ...commonExecOpts,
+      cwd: workingDir,
     });
-    await exec.exec(`git commit -m "chore: update dependencies`, [], {
-      ...commonExecOpts,
+    await exec.exec(`git commit -m "chore: update dependencies"`, [], {
+      cwd: workingDir,
     });
     await exec.exec(`git push -u origin ${headBranch} --force`, [], {
-      ...commonExecOpts,
+      cwd: workingDir,
     });
 
     logger.debug('Fetching octokit API');
+
+    // Creating a PR using octokit
     const octokit = github.getOctokit(ghToken);
 
     try {

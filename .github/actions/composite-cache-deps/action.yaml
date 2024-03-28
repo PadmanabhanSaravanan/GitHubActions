@@ -14,14 +14,16 @@ inputs:
 runs:
   using: 'composite'
   steps: 
+    # Step 1: Setup Java version
     - name: Setup Java version ${{ inputs.java-version }}
       uses: actions/setup-java@v4
       with:
         distribution: 'adopt'
         java-version: ${{ inputs.java-version }}
-        cache: 'maven'
+        cache: 'maven'  # Cache Maven dependencies
 
+    # Step 2: Install Dependencies
     - name: Install Dependencies
       run: mvn dependency:go-offline
       shell: bash
-      working-directory: ${{ inputs.working-dir }}
+      working-directory: ${{ inputs.working-dir }}  # Set working directory for Maven command
